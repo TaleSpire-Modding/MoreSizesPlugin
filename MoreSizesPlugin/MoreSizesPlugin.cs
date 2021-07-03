@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Linq;
 using UnityEngine;
 using BepInEx;
 using Newtonsoft.Json;
 using RadialUI;
 using Bounce.Unmanaged;
 using LordAshes;
-using Spaghet.Compiler.AST;
 
 namespace MoreSizesPlugin
 {
