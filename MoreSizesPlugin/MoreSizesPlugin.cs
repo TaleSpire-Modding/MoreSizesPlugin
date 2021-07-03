@@ -17,7 +17,7 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "1.0.0.0";
+        private const string Version = "1.0.1.0";
 
         /// <summary>
         /// Awake plugin
