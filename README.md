@@ -23,8 +23,8 @@ You will need to add references to:
 * UnityEngine.InputLegacyModule.dll 
 * UnityEngine.UI
 * Unity.TextMeshPro
-* RadialUI;
-* LordAshes; // StatMessaging
+* RadialUI
+* LordAshes (StatMessaging)
 ```
 
 Build the project.
@@ -32,6 +32,7 @@ Build the project.
 Browse to the newly created ```bin/Debug``` or ```bin/Release``` folders and copy the ```MoreSizesPlugin.dll``` to ```Steam\steamapps\common\TaleSpire\BepInEx\plugins```
 
 ## Changelog
+- 1.0.1: added 0.75 for size.
 - 1.0.0: Initial release
 
 ## Shoutouts

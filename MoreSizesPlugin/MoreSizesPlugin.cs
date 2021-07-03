@@ -2,6 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 using BepInEx;
+using Bounce.ManagedCollections;
 using Newtonsoft.Json;
 using RadialUI;
 using Bounce.Unmanaged;
@@ -44,9 +45,7 @@ namespace MoreSizesPlugin
             AddSize(2, Icons.GetIconSprite("2x2"));
             AddSize(3, Icons.GetIconSprite("3x3"));
             AddSize(4, Icons.GetIconSprite("4x4"));
-            AddSize(5, Icons.GetIconSprite("4x4"));
             AddSize(6, Icons.GetIconSprite("4x4"));
-            AddSize(7, Icons.GetIconSprite("4x4"));
             AddSize(8, Icons.GetIconSprite("4x4"));
             AddSize(10, Icons.GetIconSprite("4x4"));
             AddSize(15, Icons.GetIconSprite("4x4"));
@@ -107,10 +106,8 @@ namespace MoreSizesPlugin
             }
 
             scale.value = (float) obj;
+            CreatureManager.SetCreatureScale(_selectedCreature, (float)obj);
             StatMessaging.SetInfo(_selectedCreature, Guid, JsonConvert.SerializeObject(scale));
-
-
-            CreatureManager.SetCreatureScale(_selectedCreature, (float) obj);
         }
 
         private static Sprite sprite(string FileName)
@@ -141,15 +138,7 @@ namespace MoreSizesPlugin
                     CreaturePresenter.TryGetAsset(creatureId, out var asset);
                     Debug.Log(asset.CreatureLoaders[0].transform.localScale);
                     Vector3 localScale = new Vector3(size.X, size.Y, size.Z);
-                    if (size.value > 4)
-                    {
-                        asset.CreatureLoaders[0].transform.localScale = localScale * size.value / 4f;
-                    }
-                    else
-                    {
-                        asset.CreatureLoaders[0].transform.localScale = localScale;
-                    }
-                    Debug.Log(asset.CreatureLoaders[0].transform.localScale);
+                    asset.CreatureLoaders[0].transform.localScale = localScale * size.value / asset.CreatureScale;
                 }
             }
 
