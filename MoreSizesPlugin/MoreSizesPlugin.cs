@@ -39,6 +39,7 @@ namespace MoreSizesPlugin
 
             // Register Group Menus in a branch
             AddSize(0.5f, Icons.GetIconSprite("05x05"));
+            AddSize(0.75f, Icons.GetIconSprite("05x05"));
             AddSize(1, Icons.GetIconSprite("1x1"));
             AddSize(2, Icons.GetIconSprite("2x2"));
             AddSize(3, Icons.GetIconSprite("3x3"));
