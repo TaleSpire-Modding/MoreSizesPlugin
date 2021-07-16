@@ -32,6 +32,7 @@ Build the project.
 Browse to the newly created ```bin/Debug``` or ```bin/Release``` folders and copy the ```MoreSizesPlugin.dll``` to ```Steam\steamapps\common\TaleSpire\BepInEx\plugins```
 
 ## Changelog
+- 1.1.0: Addressed fix for TS Build 7035408
 - 1.0.1: added 0.75 for size.
 - 1.0.0: Initial release
 
