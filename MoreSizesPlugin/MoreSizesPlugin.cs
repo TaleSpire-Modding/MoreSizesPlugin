@@ -1,8 +1,6 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using UnityEngine;
 using BepInEx;
-using Bounce.ManagedCollections;
 using Newtonsoft.Json;
 using RadialUI;
 using Bounce.Unmanaged;
@@ -18,7 +16,7 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "1.1.0.0";
+        private const string Version = "1.3.0.0";
 
         /// <summary>
         /// Awake plugin
@@ -63,9 +61,9 @@ namespace MoreSizesPlugin
                 Guid + $"{x}x{x}",
                 new MapMenu.ItemArgs
                 {
-                    Title = $"{x}x{x}",
+                    Title = $"{x}x{x}<size=0>new",
                     Action = Menu_Scale,
-                    Obj = ((object) x),
+                    Obj = x,
                     CloseMenuOnActivate = true,
                     Icon = icon
                 }, Reporter
@@ -91,7 +89,6 @@ namespace MoreSizesPlugin
             dto scale;
             if (!string.IsNullOrWhiteSpace(fetch))
             {
-                Debug.Log(fetch);
                 scale = JsonConvert.DeserializeObject<dto>(fetch);
             }
             else
@@ -101,7 +98,7 @@ namespace MoreSizesPlugin
                 {
                     X = asset.CreatureLoaders[0].transform.localScale.x,
                     Y = asset.CreatureLoaders[0].transform.localScale.y,
-                    Z = asset.CreatureLoaders[0].transform.localScale.z,
+                    Z = asset.CreatureLoaders[0].transform.localScale.z
                 };
             }
 
@@ -110,35 +107,23 @@ namespace MoreSizesPlugin
             StatMessaging.SetInfo(_selectedCreature, Guid, JsonConvert.SerializeObject(scale));
         }
 
-        private static Sprite sprite(string FileName)
+        public static void SetValue(object o, string methodName, object value)
         {
-            var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Texture2D tex = new Texture2D(32, 32);
-            tex.LoadImage(System.IO.File.ReadAllBytes(dir + "\\" + FileName));
-            return Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f));
-        }
-
-        /// <summary>
-        /// Looping method run by plugin
-        /// </summary>
-        void Update()
-        {
-
+            var mi = o.GetType().GetField(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (mi != null) mi.SetValue(o, value);
         }
 
         public void HandleRequest(StatMessaging.Change[] changes)
         {
-            Debug.Log(changes);
             foreach (StatMessaging.Change change in changes)
             {
                 if (change.key == Guid)
                 {
                     var creatureId = change.cid;
                     var size = JsonConvert.DeserializeObject<dto>(change.value);
-                    CreaturePresenter.TryGetAsset(creatureId, out var asset);
-                    Debug.Log(asset.CreatureLoaders[0].transform.localScale);
-                    Vector3 localScale = new Vector3(size.X, size.Y, size.Z);
-                    asset.CreatureLoaders[0].transform.localScale = localScale * size.value / asset.CreatureScale;
+                    CreaturePresenter.TryGetAsset(creatureId, out CreatureBoardAsset asset);
+                    SetValue(asset, "_scaleTransitionValue",0f);
+                    SetValue(asset, "_targetScale", size.value);
                 }
             }
 

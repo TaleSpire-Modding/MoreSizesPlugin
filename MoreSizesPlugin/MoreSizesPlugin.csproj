@@ -417,5 +417,8 @@
   <ItemGroup>
     <Content Include="Resources\collection.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Patches\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -600,35 +600,6 @@ namespace ModdingTales
             }
         }
 
-        public static void UpdateSlab()
-        {
-            while (slabQueue.Count > 0)
-            {
-                var slabToPaste = slabQueue.Dequeue();
-                Debug.Log("Slab:");
-                Debug.Log(slabToPaste);
-                if (BoardSessionManager.Board.PushStringToTsClipboard(slabToPaste.SlabText) == PushStringToTsClipboardResult.Success)
-                {
-                    Copied mostRecentCopied_LocalOnly = BoardSessionManager.Board.GetMostRecentCopied_LocalOnly();
-                    if (mostRecentCopied_LocalOnly != null)
-                    {
-                        Debug.Log("X:" + slabToPaste.Position.x + " y:" + slabToPaste.Position.x + " z:" + slabToPaste.Position.z + " Slab: " + slabToPaste.SlabText);
-                        BoardSessionManager.Board.PasteCopied(new Vector3(slabToPaste.Position.x, slabToPaste.Position.y, slabToPaste.Position.z), 0, 0UL);
-                        //BoardSessionManager.Board.PasteCopied(new Vector3(slabToPaste.Position.x, slabToPaste.Position.y, slabToPaste.Position.z), 0, 0UL);
-                    }
-                }
-            }
-        }
-
-        private static void UpdateBoardLoad()
-        {
-            if (boardsToLoad.Count > 0)
-            {
-                BoardInfo bi = boardsToLoad.Dequeue();
-                SingletonBehaviour<BoardSaverManager>.Instance.Load(bi);
-            }
-        }
-
         public static Slab GetSelectedSlab()
         {
             try
