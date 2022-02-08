@@ -132,9 +132,7 @@ namespace ModdingTales
 
         static ModdingUtils()
         {
-            Commands.Add("GetCameraLocation", GetCameraLocation);
             Commands.Add("MoveCamera", MoveCamera);
-            Commands.Add("SetCameraHeight", SetCameraHeight);
             Commands.Add("RotateCamera", RotateCamera);
             Commands.Add("ZoomCamera", ZoomCamera);
             Commands.Add("TiltCamera", TiltCamera);
@@ -361,24 +359,6 @@ namespace ModdingTales
             return new APIResponse("Say queued successful").ToString();
         }
 
-        private static string SetCameraHeight(string[] input)
-        {
-            return SetCameraHeight(input[0], input[1]);
-        }
-
-        public static string SetCameraHeight(string height, string absolute)
-        {
-            if (bool.Parse(absolute))
-            {
-                CameraController.MoveToHeight(float.Parse(height), true);
-            }
-            else
-            {
-                CameraController.MoveToHeight(float.Parse(height) + CameraController.CameraHeight, true);
-            }
-            return new APIResponse("Camera Move successful").ToString();
-        }
-
         private static string TiltCamera(string[] input)
         {
             return TiltCamera(input[0], input[1]);
@@ -466,15 +446,6 @@ namespace ModdingTales
             return new APIResponse("Camera Move successful").ToString();
         }
 
-        private static string GetCameraLocation(string[] input)
-        {
-            return GetCameraLocation();
-        }
-
-        public static string GetCameraLocation()
-        {
-            return JsonConvert.SerializeObject(new F3(CameraController.Position.x, CameraController.CameraHeight, CameraController.Position.z));
-        }
         private static string MoveCamera(string[] input)
         {
             return MoveCamera(input[0], input[1], input[2], input[3]);

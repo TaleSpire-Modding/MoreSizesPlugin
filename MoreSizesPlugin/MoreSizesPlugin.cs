@@ -1,6 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using BepInEx;
+using BepInEx.Configuration;
 using Newtonsoft.Json;
 using RadialUI;
 using Bounce.Unmanaged;
@@ -16,7 +19,9 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "1.3.0.0";
+        private const string Version = "1.4.0.0";
+
+        private ConfigEntry<string> CustomSizes;
 
         /// <summary>
         /// Awake plugin
@@ -36,20 +41,32 @@ namespace MoreSizesPlugin
             RemoveSize(3);
             RemoveSize(4);
 
-            // Register Group Menus in a branch
-            AddSize(0.5f, Icons.GetIconSprite("05x05"));
-            AddSize(0.75f, Icons.GetIconSprite("05x05"));
-            AddSize(1, Icons.GetIconSprite("1x1"));
-            AddSize(2, Icons.GetIconSprite("2x2"));
-            AddSize(3, Icons.GetIconSprite("3x3"));
-            AddSize(4, Icons.GetIconSprite("4x4"));
-            AddSize(6, Icons.GetIconSprite("4x4"));
-            AddSize(8, Icons.GetIconSprite("4x4"));
-            AddSize(10, Icons.GetIconSprite("4x4"));
-            AddSize(15, Icons.GetIconSprite("4x4"));
-            AddSize(20, Icons.GetIconSprite("4x4"));
-            AddSize(25, Icons.GetIconSprite("4x4"));
-            AddSize(30, Icons.GetIconSprite("4x4"));
+            CustomSizes = Config.Bind("Sizes", "List", JsonConvert.SerializeObject(new List<float>
+            {
+                0.5f,
+                0.75f,
+                1f,
+                1.5f,
+                2f,
+                3f,
+                4f,
+                6,
+                8,
+                10,
+                15,
+                20,
+                25,
+                30,
+            }));
+            var sizes = JsonConvert.DeserializeObject<List<float>>(CustomSizes.Value);
+            foreach (var size in sizes)
+            {
+                if (size < 1) AddSize(size, Icons.GetIconSprite("05x05"));
+                else if (size < 2) AddSize(size, Icons.GetIconSprite("1x1"));
+                else if (size < 3) AddSize(size, Icons.GetIconSprite("2x2"));
+                else if (size < 4) AddSize(size, Icons.GetIconSprite("3x3"));
+                else AddSize(size, Icons.GetIconSprite("4x4"));
+            }
 
             // StatMessaging
             StatMessaging.Subscribe(Guid, HandleRequest);
