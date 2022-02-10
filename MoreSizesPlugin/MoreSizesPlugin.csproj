@@ -36,9 +36,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\TaleSpire\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="0Harmony20">
-      <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\TaleSpire\profiles\Default\BepInEx\core\0Harmony20.dll</HintPath>
-    </Reference>
     <Reference Include="BepInEx, Version=5.4.9.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\TaleSpire\profiles\Default\BepInEx\core\BepInEx.dll</HintPath>
@@ -395,6 +392,7 @@
     <Compile Include="dto.cs" />
     <Compile Include="MoreSizesPlugin.cs" />
     <Compile Include="ModdingUtil.cs" />
+    <Compile Include="Patches\CreatureMenuBoardPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -411,14 +409,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\thunderstore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\collection.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Patches\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

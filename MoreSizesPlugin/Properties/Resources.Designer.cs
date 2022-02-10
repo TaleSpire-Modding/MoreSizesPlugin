@@ -59,15 +59,5 @@ namespace MoreSizesPlugin.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap thunderstore {
-            get {
-                object obj = ResourceManager.GetObject("thunderstore", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

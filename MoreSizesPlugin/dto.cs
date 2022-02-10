@@ -9,4 +9,10 @@ namespace MoreSizesPlugin
         public float Z;
         public float value;
     }
+
+    internal class effectResize
+    {
+        public string key;
+        public float value;
+    }
 }
