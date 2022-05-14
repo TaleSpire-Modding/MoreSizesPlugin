@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using BepInEx;
@@ -22,7 +21,7 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.0.0.0";
+        private const string Version = "2.1.0.0";
         private const string key = "org.lordashes.plugins.extraassetsregistration.Aura.";
         private static CreatureGuid _selectedCreature;
 
@@ -30,12 +29,6 @@ namespace MoreSizesPlugin
         private readonly Dictionary<CreatureGuid, List<string>> _knownCreatureEffects =
             new Dictionary<CreatureGuid, List<string>>();
 
-        /*private readonly Dictionary<CreatureGuid, List<effectResize>> _CreatureAuras =
-            new Dictionary<CreatureGuid, List<effectResize>>();
-
-        private readonly Dictionary<CreatureGuid, List<effectResize>> _CreatureAuraQueue =
-            new Dictionary<CreatureGuid, List<effectResize>>();
-        */
         // Config
         private ConfigEntry<string> _customSizes;
 
@@ -83,40 +76,10 @@ namespace MoreSizesPlugin
             StatMessaging.Subscribe("*", HandleRequest);
         }
 
-        /*
-        void Update()
-        {
-            List<CreatureGuid> cgDone = new List<CreatureGuid>();
-            foreach (var key in _CreatureAuraQueue.Keys) {
-                CreaturePresenter.TryGetAsset(_selectedCreature, out var asset);
-                var entries = _CreatureAuraQueue[key];
-                List<effectResize> done = new List<effectResize>();
-                foreach (var entry in entries)
-                {
-                    var me = asset.gameObject.FindChild(entry.key);
-                    if (me != null)
-                    {
-                        var all = me.transform.GetComponentsInChildren<ParticleSystem>();
-                        foreach (var p in all) {
-                            p.transform.localScale = p.transform.localScale * entry.value;
-                        }
-                        done.Add(entry);
-                    }
-                }
-                entries.RemoveAll(e => done.Contains(e));
-                if (entries.Count == 0) cgDone.Add(key);
-            }
-            foreach (var done in cgDone)
-            {
-                _CreatureAuraQueue.Remove(done);
-            }
-        }
-        */
-
         private void HandleSubmenus(MapMenuItem arg1, object arg2)
         {
             CreaturePresenter.TryGetAsset(_selectedCreature, out CreatureBoardAsset asset);
-            var c = asset.Creature;
+            var c = asset;
             if (!_knownCreatureEffects.ContainsKey(c.CreatureId) || _knownCreatureEffects[c.CreatureId].Count == 0)
                 OpenResizeMini(arg1, arg2);
             else OpenSelectAsset(arg1, arg2);
@@ -125,7 +88,7 @@ namespace MoreSizesPlugin
         private void OpenSelectAsset(MapMenuItem arg1, object arg2)
         {
             CreaturePresenter.TryGetAsset(_selectedCreature, out CreatureBoardAsset asset);
-            var c = asset.Creature;
+            var c = asset;
             MapMenu mapMenu = MapMenuManager.OpenMenu(c.transform.position + Vector3.up * CreatureMenuBoardPatch._hitHeightDif, true);
 
             mapMenu.AddItem(new MapMenu.ItemArgs
@@ -155,7 +118,7 @@ namespace MoreSizesPlugin
         {
             string effect = (string)arg2;
             CreaturePresenter.TryGetAsset(_selectedCreature, out CreatureBoardAsset asset);
-            var c = asset.Creature;
+            var c = asset;
             MapMenu mapMenu = MapMenuManager.OpenMenu(c.transform.position + Vector3.up * CreatureMenuBoardPatch._hitHeightDif, true);
             var sizes = JsonConvert.DeserializeObject<List<float>>(_customSizes.Value);
             foreach (var size in sizes)
@@ -171,7 +134,7 @@ namespace MoreSizesPlugin
         private void OpenResizeMini(MapMenuItem arg1, object arg2)
         {
             CreaturePresenter.TryGetAsset(_selectedCreature, out CreatureBoardAsset asset);
-            var c = asset.Creature;
+            var c = asset;
             MapMenu mapMenu = MapMenuManager.OpenMenu(c.transform.position + Vector3.up * CreatureMenuBoardPatch._hitHeightDif, true);
             var sizes = JsonConvert.DeserializeObject<List<float>>(_customSizes.Value);
             foreach (var size in sizes)
@@ -233,9 +196,9 @@ namespace MoreSizesPlugin
                 CreaturePresenter.TryGetAsset(_selectedCreature, out var asset);
                 scale = new dto
                 {
-                    X = asset.CreatureLoaders[0].transform.localScale.x,
-                    Y = asset.CreatureLoaders[0].transform.localScale.y,
-                    Z = asset.CreatureLoaders[0].transform.localScale.z
+                    X = asset.transform.localScale.x,
+                    Y = asset.transform.localScale.y,
+                    Z = asset.transform.localScale.z
                 };
             }
 
@@ -276,7 +239,7 @@ namespace MoreSizesPlugin
                     {
                         foreach (var p in all)
                         {
-                            p.transform.localScale = p.transform.localScale / previous.value;
+                            p.transform.localScale /= previous.value;
                         }
                         foreach (var t in allT)
                         {
@@ -287,7 +250,7 @@ namespace MoreSizesPlugin
                     {
                         foreach (var p in all)
                         {
-                            p.transform.localScale = p.transform.localScale * er.value;
+                            p.transform.localScale *= er.value;
                         }
                         foreach (var t in allT)
                         {
@@ -300,23 +263,11 @@ namespace MoreSizesPlugin
                 else if (change.key.Contains(key))
                 {
                     var x = change.key.Replace(key,"");
-                    var AssetName = $"CustomAura:{change.cid}.{x}";
                     if (change.action == StatMessaging.ChangeType.added)
                     {
                         if (!_knownCreatureEffects.ContainsKey(change.cid))
                             _knownCreatureEffects[change.cid] = new List<string>();
                         _knownCreatureEffects[change.cid].Add(change.key);
-                        /*
-                        if (_CreatureAuras.ContainsKey(change.cid) &&
-                            _CreatureAuras[change.cid].Any(e => e.key == change.key))
-                        {
-                            if (!_CreatureAuraQueue.ContainsKey(change.cid))
-                            {
-                                _CreatureAuraQueue.Add(change.cid, new List<effectResize>());
-                            }
-                            var entry = _CreatureAuras[change.cid].Single(e => e.key == change.key);
-                            _CreatureAuraQueue[change.cid].Add(entry);
-                        }*/
                     } else if (change.action == StatMessaging.ChangeType.removed)
                     {
                         if (_knownCreatureEffects.ContainsKey(change.cid))
