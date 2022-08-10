@@ -17,11 +17,12 @@ namespace MoreSizesPlugin
     [BepInPlugin(Guid, "HolloFoxes' More Sizes Plug-In", Version)]
     [BepInDependency(RadialUIPlugin.Guid)]
     [BepInDependency(StatMessaging.Guid)]
+    [BepInDependency("org.generic.plugins.setinjectionflag")]
     public class MoreSizesPlugin : BaseUnityPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.1.0.0";
+        private const string Version = "2.1.1.0";
         private const string key = "org.lordashes.plugins.extraassetsregistration.Aura.";
         private static CreatureGuid _selectedCreature;
 
