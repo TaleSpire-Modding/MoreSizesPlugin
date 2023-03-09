@@ -14,7 +14,34 @@ using RadialUI.Extensions;
 namespace MoreSizesPlugin
 {
 
-    [BepInPlugin(Guid, "HolloFoxes' More Sizes Plug-In", Version)]
+    public static class RadialExtensions
+    {
+        public static GameObject FindChild(this GameObject gameObject, string name, bool includeInactive = false)
+        {
+            Transform[] childTransforms = gameObject.GetComponentsInChildren<Transform>(includeInactive);
+            RectTransform[] rectTransforms = gameObject.GetComponentsInChildren<RectTransform>(includeInactive);
+
+            if (childTransforms != null)
+                foreach (Transform transform in childTransforms)
+                {
+                    GameObject child = transform.gameObject;
+                    if (child?.name == name)
+                        return child;
+                }
+
+            if (rectTransforms != null)
+                foreach (Transform transform in rectTransforms)
+                {
+                    GameObject child = transform.gameObject;
+                    if (child?.name == name)
+                        return child;
+                }
+
+            return null;
+        }
+    }
+
+        [BepInPlugin(Guid, "More Sizes Plug-In", Version)]
     [BepInDependency(RadialUIPlugin.Guid)]
     [BepInDependency(StatMessaging.Guid)]
     [BepInDependency("org.generic.plugins.setinjectionflag")]
@@ -22,7 +49,7 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.1.1.0";
+        private const string Version = "2.1.4.0";
         private const string key = "org.lordashes.plugins.extraassetsregistration.Aura.";
         private static CreatureGuid _selectedCreature;
 
@@ -55,12 +82,15 @@ namespace MoreSizesPlugin
                 20,
                 25,
                 30,
+            }),new ConfigDescription("", null, new ConfigurationManagerAttributes
+            {
+                IsJSON = true
             }));
             var harmony = new Harmony(Guid);
             harmony.PatchAll();
             Debug.Log("MoreSizes Plug-in loaded");
 
-            ModdingTales.ModdingUtils.Initialize(this, Logger);
+            ModdingTales.ModdingUtils.Initialize(this, Logger, "Hollofoxes'");
 
             RadialUIPlugin.HideDefaultEmotesGMItem(Guid,"Set Size");
             RadialUIPlugin.AddCustomButtonGMSubmenu("Set Size",
