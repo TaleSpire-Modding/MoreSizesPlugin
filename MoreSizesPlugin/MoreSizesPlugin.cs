@@ -10,6 +10,7 @@ using HarmonyLib;
 using LordAshes;
 using MoreSizesPlugin.Patches;
 using RadialUI.Extensions;
+using PluginUtilities;
 
 namespace MoreSizesPlugin
 {
@@ -41,10 +42,10 @@ namespace MoreSizesPlugin
         }
     }
 
-        [BepInPlugin(Guid, "More Sizes Plug-In", Version)]
+    [BepInPlugin(Guid, "More Sizes Plug-In", Version)]
     [BepInDependency(RadialUIPlugin.Guid)]
+    [BepInDependency(SetInjectionFlag.Guid)]
     [BepInDependency(StatMessaging.Guid)]
-    [BepInDependency("org.generic.plugins.setinjectionflag")]
     public class MoreSizesPlugin : BaseUnityPlugin
     {
         // constants
@@ -75,20 +76,20 @@ namespace MoreSizesPlugin
                 2f,
                 3f,
                 4f,
-                6,
-                8,
-                10,
-                15,
-                20,
-                25,
-                30,
+                6f,
+                8f,
+                10f,
+                15f,
+                20f,
+                25f,
+                30f,
             }),new ConfigDescription("", null, new ConfigurationManagerAttributes
             {
                 IsJSON = true
             }));
             var harmony = new Harmony(Guid);
             harmony.PatchAll();
-            Debug.Log("MoreSizes Plug-in loaded");
+            Logger.LogDebug("MoreSizes Plug-in loaded");
 
             ModdingTales.ModdingUtils.Initialize(this, Logger, "Hollofoxes'");
 
@@ -289,7 +290,7 @@ namespace MoreSizesPlugin
                         }
                     }
 
-                    Debug.Log($"Change to size: ({change.value}, {er.value})");
+                    Logger.LogDebug($"Change to size: ({change.value}, {er.value})");
                 }
                 else if (change.key.Contains(key))
                 {
