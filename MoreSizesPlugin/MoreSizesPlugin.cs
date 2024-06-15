@@ -9,7 +9,6 @@ using Bounce.Unmanaged;
 using HarmonyLib;
 using LordAshes;
 using MoreSizesPlugin.Patches;
-using RadialUI.Extensions;
 using PluginUtilities;
 
 namespace MoreSizesPlugin
@@ -44,13 +43,14 @@ namespace MoreSizesPlugin
 
     [BepInPlugin(Guid, "More Sizes Plug-In", Version)]
     [BepInDependency(RadialUIPlugin.Guid)]
+    [BepInDependency(AssetDataPlugin.Guid)]
+    [BepInDependency(FileAccessPlugin.Guid)]
     [BepInDependency(SetInjectionFlag.Guid)]
-    [BepInDependency(StatMessaging.Guid)]
     public class MoreSizesPlugin : BaseUnityPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.1.4.0";
+        private const string Version = "2.2.0.0";
         private const string key = "org.lordashes.plugins.extraassetsregistration.Aura.";
         private static CreatureGuid _selectedCreature;
 
@@ -91,21 +91,21 @@ namespace MoreSizesPlugin
             harmony.PatchAll();
             Logger.LogDebug("MoreSizes Plug-in loaded");
 
-            ModdingTales.ModdingUtils.Initialize(this, Logger, "Hollofoxes'");
+            ModdingTales.ModdingUtils.AddPluginToMenuList(this, "Hollofoxes'");
 
             RadialUIPlugin.HideDefaultEmotesGMItem(Guid,"Set Size");
             RadialUIPlugin.AddCustomButtonGMSubmenu("Set Size",
                 new MapMenu.ItemArgs
                 {
                     Action = HandleSubmenus,
-                    Icon = Icons.GetIconSprite("creaturesize"),
+                    Icon = FileAccessPlugin.Image.LoadSprite("MoreSizesPlugin.png"),
                     CloseMenuOnActivate = false,
                     Title = "Set Size",
                 }
                 ,Reporter);
 
             // StatMessaging
-            StatMessaging.Subscribe("*", HandleRequest);
+            AssetDataPlugin.Subscribe("*", HandleRequest);
         }
 
         private void HandleSubmenus(MapMenuItem arg1, object arg2)
@@ -206,7 +206,7 @@ namespace MoreSizesPlugin
         private void Scale_Effect(MapMenuItem arg1, object arg2)
         {
             var er = (effectResize) arg2;
-            StatMessaging.SetInfo(_selectedCreature, $"size.{er.key}", JsonConvert.SerializeObject(er));
+            AssetDataPlugin.SetInfo(_selectedCreature.ToString(), $"size.{er.key}", JsonConvert.SerializeObject(er));
         }
 
         private bool Reporter(NGuid arg1, NGuid arg2)
@@ -217,7 +217,7 @@ namespace MoreSizesPlugin
 
         private void Menu_Scale(MapMenuItem item, object obj)
         {
-            var fetch = StatMessaging.ReadInfo(_selectedCreature, Guid);
+            var fetch = AssetDataPlugin.ReadInfo(_selectedCreature.ToString(), Guid);
             dto scale;
             if (!string.IsNullOrWhiteSpace(fetch))
             {
@@ -236,7 +236,7 @@ namespace MoreSizesPlugin
 
             scale.value = (float) obj;
             CreatureManager.SetCreatureScale(_selectedCreature ,0, (float)obj);
-            StatMessaging.SetInfo(_selectedCreature, Guid, JsonConvert.SerializeObject(scale));
+            AssetDataPlugin.SetInfo(_selectedCreature.ToString(), Guid, JsonConvert.SerializeObject(scale));
         }
 
         public static void SetValue(object o, string methodName, object value)
@@ -245,77 +245,74 @@ namespace MoreSizesPlugin
             if (mi != null) mi.SetValue(o, value);
         }
 
-        public void HandleRequest(StatMessaging.Change[] changes)
+        public void HandleRequest(AssetDataPlugin.DatumChange change)
         {
-            foreach (StatMessaging.Change change in changes)
+            if (change.key.Contains($"size.{key}"))
             {
-                if (change.key.Contains($"size.{key}"))
+                var previous = JsonConvert.DeserializeObject<effectResize>(change.previous.ToString());
+                var er = JsonConvert.DeserializeObject<effectResize>(change.value.ToString());
+
+                var goName = change.key.Replace($"size.{key}", "");
+                var AssetName = $"CustomAura:{change.source}.{goName}";
+
+                var creatureId = new CreatureGuid(change.source);
+                CreaturePresenter.TryGetAsset(creatureId, out CreatureBoardAsset asset);
+
+                var me = asset.gameObject.FindChild(AssetName);
+                me.gameObject.SetActive(false);
+                me.gameObject.SetActive(true);
+
+                var all = me.transform.GetComponentsInChildren<ParticleSystem>();
+                var allT = me.transform.GetComponentsInChildren<Transform>();
+
+                if (change.action == AssetDataPlugin.ChangeAction.modify)
                 {
-                    var previous = JsonConvert.DeserializeObject<effectResize>(change.previous);
-                    var er = JsonConvert.DeserializeObject<effectResize>(change.value);
-
-                    var goName = change.key.Replace($"size.{key}", "");
-                    var AssetName = $"CustomAura:{change.cid}.{goName}";
-                    
-                    var creatureId = change.cid;
-                    CreaturePresenter.TryGetAsset(creatureId, out CreatureBoardAsset asset);
-
-                    var me = asset.gameObject.FindChild(AssetName);
-                    me.gameObject.SetActive(false);
-                    me.gameObject.SetActive(true);
-
-                    var all = me.transform.GetComponentsInChildren<ParticleSystem>();
-                    var allT = me.transform.GetComponentsInChildren<Transform>();
-
-                    if (change.action == StatMessaging.ChangeType.modified)
+                    foreach (var p in all)
                     {
-                        foreach (var p in all)
-                        {
-                            p.transform.localScale /= previous.value;
-                        }
-                        foreach (var t in allT)
-                        {
-                            t.localScale = t.transform.localScale / previous.value;
-                        }
+                        p.transform.localScale /= previous.value;
                     }
-                    if (change.action != StatMessaging.ChangeType.removed)
+                    foreach (var t in allT)
                     {
-                        foreach (var p in all)
-                        {
-                            p.transform.localScale *= er.value;
-                        }
-                        foreach (var t in allT)
-                        {
-                            t.localScale = t.transform.localScale * er.value;
-                        }
-                    }
-
-                    Logger.LogDebug($"Change to size: ({change.value}, {er.value})");
-                }
-                else if (change.key.Contains(key))
-                {
-                    var x = change.key.Replace(key,"");
-                    if (change.action == StatMessaging.ChangeType.added)
-                    {
-                        if (!_knownCreatureEffects.ContainsKey(change.cid))
-                            _knownCreatureEffects[change.cid] = new List<string>();
-                        _knownCreatureEffects[change.cid].Add(change.key);
-                    } else if (change.action == StatMessaging.ChangeType.removed)
-                    {
-                        if (_knownCreatureEffects.ContainsKey(change.cid))
-                            _knownCreatureEffects[change.cid].Remove(change.key);
+                        t.localScale = t.transform.localScale / previous.value;
                     }
                 }
-                if (change.key == Guid)
+                if (change.action != AssetDataPlugin.ChangeAction.remove)
                 {
-                    var creatureId = change.cid;
-                    var size = JsonConvert.DeserializeObject<dto>(change.value);
-                    CreaturePresenter.TryGetAsset(creatureId, out CreatureBoardAsset asset);
-                    SetValue(asset, "_scaleTransitionValue",0f);
-                    SetValue(asset, "_targetScale", size.value);
+                    foreach (var p in all)
+                    {
+                        p.transform.localScale *= er.value;
+                    }
+                    foreach (var t in allT)
+                    {
+                        t.localScale = t.transform.localScale * er.value;
+                    }
+                }
+
+                Logger.LogDebug($"Change to size: ({change.value}, {er.value})");
+            }
+            else if (change.key.Contains(key))
+            {
+                var x = change.key.Replace(key, "");
+                if (change.action == AssetDataPlugin.ChangeAction.add)
+                {
+                    if (!_knownCreatureEffects.ContainsKey(new CreatureGuid(change.source)))
+                        _knownCreatureEffects[new CreatureGuid(change.source)] = new List<string>();
+                    _knownCreatureEffects[new CreatureGuid(change.source)].Add(change.key);
+                }
+                else if (change.action == AssetDataPlugin.ChangeAction.remove)
+                {
+                    if (_knownCreatureEffects.ContainsKey(new CreatureGuid(change.source)))
+                        _knownCreatureEffects[new CreatureGuid(change.source)].Remove(change.key);
                 }
             }
-
+            if (change.key == Guid)
+            {
+                var creatureId = new CreatureGuid(change.source);
+                var size = JsonConvert.DeserializeObject<dto>(change.value.ToString());
+                CreaturePresenter.TryGetAsset(creatureId, out CreatureBoardAsset asset);
+                SetValue(asset, "_scaleTransitionValue", 0f);
+                SetValue(asset, "_targetScale", size.value);
+            }
         }
     }
 }

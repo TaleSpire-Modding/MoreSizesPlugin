@@ -14,7 +14,6 @@
     <Description>Add more size options to TaleSpire</Description>
     <PackageTags>TaleSpire;Mods;</PackageTags>
     <licenseUrl>https://github.com/TaleSpire-Modding/MoreSizesPlugin/raw/main/LICENSE.txt</licenseUrl>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <Authors>HolloFox</Authors>
     <LangVersion>8</LangVersion>
     <Platforms>AnyCPU;x64</Platforms>
@@ -32,7 +31,16 @@
     <PackageReference Include="Talespire.BepInEx" Version="5.4.22"></PackageReference>
     <PackageReference Include="TaleSpire.ConfigurationManager" Version="0.15.0" />
     <PackageReference Include="TaleSpire.RadialUI" Version="2.6.1" />
-    <PackageReference Include="TaleSpire.SetInjectionFlagPlugin" Version="2.5.2" />
+    <PackageReference Include="TaleSpire.SetInjectionFlagPlugin" Version="2.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AssetDataPlugin">
+      <HintPath>C:\Users\ujkkj\AppData\Roaming\r2modmanPlus-local\TaleSpire\profiles\Starfinder\BepInEx\plugins\LordAshes-AssetDataPlugin\AssetDataPlugin.dll</HintPath>
+    </Reference>
+    <Reference Include="FileAccessPlugin">
+      <HintPath>C:\Users\ujkkj\AppData\Roaming\r2modmanPlus-local\TaleSpire\profiles\Starfinder\BepInEx\plugins\LordAshes-FileAccessPlugin\FileAccessPlugin.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
