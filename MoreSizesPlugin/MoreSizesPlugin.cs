@@ -16,34 +16,6 @@ using MoreSizesPlugin.Consumer.Messages;
 
 namespace MoreSizesPlugin
 {
-
-    public static class RadialExtensions
-    {
-        public static GameObject FindChild(this GameObject gameObject, string name, bool includeInactive = false)
-        {
-            Transform[] childTransforms = gameObject.GetComponentsInChildren<Transform>(includeInactive);
-            RectTransform[] rectTransforms = gameObject.GetComponentsInChildren<RectTransform>(includeInactive);
-
-            if (childTransforms != null)
-                foreach (Transform transform in childTransforms)
-                {
-                    GameObject child = transform.gameObject;
-                    if (child?.name == name)
-                        return child;
-                }
-
-            if (rectTransforms != null)
-                foreach (Transform transform in rectTransforms)
-                {
-                    GameObject child = transform.gameObject;
-                    if (child?.name == name)
-                        return child;
-                }
-
-            return null;
-        }
-    }
-
     [BepInPlugin(Guid, "More Sizes Plug-In", Version)]
     [BepInDependency(RadialUIPlugin.Guid)]
     [BepInDependency(SetInjectionFlag.Guid)]
@@ -52,7 +24,7 @@ namespace MoreSizesPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.3.0.0";
+        private const string Version = "2.3.1.0";
         private static CreatureGuid _selectedCreature;
 
         private readonly float[] coreSizes = new[] { 0.5f, 1f, 2f, 3f, 4f };
