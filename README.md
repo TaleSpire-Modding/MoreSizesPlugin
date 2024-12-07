@@ -34,6 +34,7 @@ Build the project.
 Browse to the newly created ```bin/Debug``` or ```bin/Release``` folders and copy the ```MoreSizesPlugin.dll``` to ```Steam\steamapps\common\TaleSpire\BepInEx\plugins```
 
 ## Changelog
+- 2.4.0: Added persistance via Asset Data Plugin (Contributed by Lord Ashes)
 - 2.3.1: Update/correct ReadMe
 - 2.3.0: temp RPC Migration,
 - 2.2.1: Fix dependencies

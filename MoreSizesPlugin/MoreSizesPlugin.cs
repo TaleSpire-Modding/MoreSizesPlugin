@@ -13,6 +13,8 @@ using System.IO;
 using System.Linq;
 using RPCPlugin.RPC;
 using MoreSizesPlugin.Consumer.Messages;
+using System.Collections;
+using System;
 
 namespace MoreSizesPlugin
 {
@@ -20,23 +22,31 @@ namespace MoreSizesPlugin
     [BepInDependency(RadialUIPlugin.Guid)]
     [BepInDependency(SetInjectionFlag.Guid)]
     [BepInDependency(RPCPlugin.RPCPlugin.Guid)]
+    [BepInDependency("org.lordashes.plugins.assetdata", BepInDependency.DependencyFlags.SoftDependency)]
     public class MoreSizesPlugin : BaseUnityPlugin
     {
         // constants
         private const string Guid = "org.hollofox.plugins.MoreSizesPlugin";
-        private const string Version = "2.3.1.0";
+        private const string Version = "2.4.0.0";
         private static CreatureGuid _selectedCreature;
 
+        private static MoreSizesPlugin _self = null;
         private readonly float[] coreSizes = new[] { 0.5f, 1f, 2f, 3f, 4f };
+        private static float _restorationDelay = 1.0f;
+        private MethodInfo setMethod = null;
+        private MethodInfo clearMethod = null;
 
         // Config
         private ConfigEntry<string> _customSizes;
+
 
         /// <summary>
         /// Awake plugin
         /// </summary>
         void Awake()
         {
+            _self = this;
+
             Logger.LogInfo("In Awake for More Sizes");
             _customSizes = Config.Bind("Sizes", "List", JsonConvert.SerializeObject(new List<float>
             {
@@ -55,6 +65,8 @@ namespace MoreSizesPlugin
                 25f,
                 30f,
             }));
+
+            _restorationDelay = Config.Bind("Settings", "Restoration delay upon board dload", 1.0f).Value;
             var harmony = new Harmony(Guid);
             harmony.PatchAll();
             Logger.LogDebug("MoreSizes Plug-in loaded");
@@ -71,6 +83,42 @@ namespace MoreSizesPlugin
                     Title = "Set Size",
                 }
                 , Reporter);
+
+            AddAssetDataPluginPersistenceIfAvailable();
+        }
+
+        private void AddAssetDataPluginPersistenceIfAvailable()
+        {
+            Type adp = Type.GetType("LordAshes.AssetDataPlugin, AssetDataPlugin");
+            if(adp != null)
+            {
+                MethodInfo subscribeMethod = adp.GetRuntimeMethods().Where(m => m.Name == "SubscribeViaReflection").ElementAt(0);
+                subscribeMethod.Invoke(null, new object[] { MoreSizesPlugin.Guid + ".size", this.GetType().AssemblyQualifiedName, "RestoreSize" });
+                setMethod = adp.GetRuntimeMethods().Where(m => m.Name == "SetInfo").ElementAt(0);
+                clearMethod = adp.GetRuntimeMethods().Where(m => m.Name == "ClearInfo").ElementAt(0);
+                Logger.LogDebug("More Size Plugin size persistence handled by Asset Data Plugin." );
+            }
+            else
+            {
+                Logger.LogDebug("More Size Plugin size persistence unavailable. Missing Asset Data Plugin.");
+            }
+        }
+
+        public static void RestoreSize(string action, string identity, string key, object previous, object value)
+        {
+            _self.Logger.LogDebug(DateTime.UtcNow+ ": Preparing to restore custom size " + value + " on creature id " + identity);
+            _self.StartCoroutine(DelayedRestoreSize(new NGuid(identity).ToHexString(), float.Parse(value.ToString(), System.Globalization.CultureInfo.InvariantCulture), _restorationDelay));
+        }
+
+        private static IEnumerator DelayedRestoreSize(string cid, float actualSize, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            _self.Logger.LogDebug(DateTime.UtcNow + ": Restoring custom size " + actualSize + " on creature id " + cid);
+            RPCInstance.SendMessage(new ScaleMini
+            {
+                size = actualSize,
+                cid = cid
+            });
         }
 
         private static Sprite LoadEmbeddedTexture(string texturePath)
@@ -141,10 +189,20 @@ namespace MoreSizesPlugin
                     size = actualSize,
                     cid = cid
                 });
+                if (setMethod != null)
+                {
+                    Logger.LogDebug("Saving custom size " + actualSize + " on creature id " + cid);
+                    setMethod.Invoke(null,new object[] { _selectedCreature.Value.ToString(), MoreSizesPlugin.Guid + ".size", actualSize.ToString(), false});
+                }
             }
             else
             {
                 CreatureManager.SetCreatureScale(_selectedCreature, 0, actualSize);
+                if (clearMethod != null)
+                {
+                    Logger.LogDebug("Clearing custom size " + actualSize + " on creature id " + cid);
+                    clearMethod.Invoke(null, new object[] { _selectedCreature.Value.ToString(), MoreSizesPlugin.Guid, false });
+                }
             }
         }
     }
